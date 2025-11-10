@@ -114,6 +114,9 @@ export function DashboardView() {
 
       // Fetch all data in parallel
       const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://fba-tasks-fsdi-api.vercel.app";
+      console.log("🔍 API_BASE:", API_BASE);
+      console.log("🚀 Starting API calls...");
+      
       const [statsRes, trendsRes, vendorsRes, categoriesRes, forecastRes, invoicesRes] =
         await Promise.all([
           fetch(`${API_BASE}/api/stats`),
@@ -123,6 +126,15 @@ export function DashboardView() {
           fetch(`${API_BASE}/api/cash-outflow`),
           fetch(`${API_BASE}/api/invoices?limit=10`),
         ]);
+      
+      console.log("✅ API calls completed:", {
+        stats: statsRes.status,
+        trends: trendsRes.status,
+        vendors: vendorsRes.status,
+        categories: categoriesRes.status,
+        forecast: forecastRes.status,
+        invoices: invoicesRes.status
+      });
 
       // Check if responses are ok
       if (!statsRes.ok) {
@@ -151,14 +163,27 @@ export function DashboardView() {
       const forecastData = forecastRes.ok ? await forecastRes.json() : [];
       const invoicesData = invoicesRes.ok ? await invoicesRes.json() : { invoices: [] };
 
+      console.log("📊 Setting state with data:", {
+        stats: statsData ? "✓" : "✗",
+        trends: trendsData?.length || 0,
+        vendors: vendorsData?.length || 0,
+        categories: categoriesData?.length || 0,
+        forecast: forecastData?.length || 0,
+        invoices: invoicesData?.invoices?.length || 0
+      });
+
       setStats(statsData);
       setTrends(trendsData);
       setVendors(vendorsData);
       setCategories(categoriesData);
       setForecast(forecastData);
       setInvoices(invoicesData.invoices || []);
+      
+      console.log("✅ Dashboard data loaded successfully!");
     } catch (error) {
-      console.error("Error loading dashboard data:", error);
+      console.error("❌ Error loading dashboard data:", error);
+      // Set loading to false even on error so user isn't stuck
+      setLoading(false);
     } finally {
       setLoading(false);
     }

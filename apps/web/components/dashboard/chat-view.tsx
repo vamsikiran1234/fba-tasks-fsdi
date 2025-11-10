@@ -92,6 +92,9 @@ export function ChatView() {
 
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://fba-tasks-fsdi-api.vercel.app";
+      console.log("💬 Chat API_BASE:", API_BASE);
+      console.log("💬 Sending query:", input);
+      
       const response = await fetch(`${API_BASE}/api/chat-with-data`, {
         method: "POST",
         headers: {
@@ -102,7 +105,11 @@ export function ChatView() {
         }),
       });
 
+      console.log("💬 Chat response status:", response.status);
+      
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error("💬 Chat error response:", errorText);
         throw new Error("Failed to get response");
       }
 
