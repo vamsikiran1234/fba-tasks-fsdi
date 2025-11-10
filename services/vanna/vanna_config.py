@@ -161,6 +161,11 @@ Examples of CORRECT syntax:
     def run_sql(self, sql: str):
         """Execute SQL and return results"""
         try:
+            # Check connection and reconnect if needed
+            if self.db_connection is None or self.db_connection.closed:
+                print("⚠️ Database connection closed, reconnecting...")
+                self.connect_to_database()
+            
             cursor = self.db_connection.cursor()
             cursor.execute(sql)
             
