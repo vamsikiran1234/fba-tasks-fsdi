@@ -37,11 +37,11 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
       throw new Error(`Vanna AI service error: ${response.status} - ${errorText}`);
     }
 
-    const data = await response.json() as { 
-      sql: string; 
-      results: unknown; 
-      explanation: string; 
-      conversation_id: string 
+    const data = (await response.json()) as {
+      sql: string;
+      results: unknown;
+      explanation: string;
+      conversation_id: string;
     };
 
     res.json({

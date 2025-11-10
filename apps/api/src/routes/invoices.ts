@@ -37,7 +37,7 @@ router.get("/", async (req: Request, res: Response) => {
 
     if (search || vendor) {
       where.extractedData = {};
-      
+
       if (search) {
         where.OR = [
           {
@@ -118,9 +118,7 @@ router.get("/", async (req: Request, res: Response) => {
       invoiceNumber: invoice.extractedData?.invoiceNumber || "N/A",
       invoiceDate: invoice.extractedData?.invoiceDate,
       dueDate: invoice.extractedData?.dueDate,
-      amount: invoice.extractedData?.totalAmount
-        ? Number(invoice.extractedData.totalAmount)
-        : 0,
+      amount: invoice.extractedData?.totalAmount ? Number(invoice.extractedData.totalAmount) : 0,
       currency: invoice.extractedData?.currency || "EUR",
       status: invoice.status,
       category: invoice.extractedData?.category || "Uncategorized",

@@ -125,9 +125,7 @@ router.get("/", async (_req: Request, res: Response) => {
     const avgInvoiceValue = Number(avgInvoiceResult._avg.totalAmount || 0);
     const lastMonthAvgValue = Number(lastMonthAvg._avg.totalAmount || 0);
     const avgChange =
-      lastMonthAvgValue > 0
-        ? ((avgInvoiceValue - lastMonthAvgValue) / lastMonthAvgValue) * 100
-        : 0;
+      lastMonthAvgValue > 0 ? ((avgInvoiceValue - lastMonthAvgValue) / lastMonthAvgValue) * 100 : 0;
 
     res.json({
       totalSpend: {
