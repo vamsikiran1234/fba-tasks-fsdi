@@ -1,0 +1,284 @@
+// Prisma Schema for Flowbit Analytics Platform
+// Normalized schema for invoice data with proper relationships
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Organizations table
+model Organization {
+  id          String       @id
+  name        String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  departments Department[]
+  invoices    Invoice[]
+  users       User[]
+
+  @@map("organizations")
+}
+
+// Departments within organizations
+model Department {
+  id             String       @id
+  name           String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  invoices       Invoice[]
+
+  @@index([organizationId])
+  @@map("departments")
+}
+
+// Users who upload/validate invoices
+model User {
+  id                   String       @id
+  email                String       @unique
+  name                 String?
+  role                 String       @default("user")
+  organizationId       String
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  uploadedInvoices     Invoice[]    @relation("UploadedBy")
+  validatedInvoices    Invoice[]    @relation("ValidatedBy")
+  assignedInvoices     Invoice[]    @relation("AssignedTo")
+  chatHistory          ChatHistory[]
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("users")
+}
+
+// Main invoices table
+model Invoice {
+  id                   String        @id
+  name                 String
+  filePath             String
+  fileSize             BigInt
+  fileType             String
+  status               String        @default("pending") // pending, processed, validated, rejected
+  organizationId       String
+  organization         Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  departmentId         String
+  department           Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  uploadedById         String
+  uploadedBy           User          @relation("UploadedBy", fields: [uploadedById], references: [id])
+  assignedToId         String?
+  assignedTo           User?         @relation("AssignedTo", fields: [assignedToId], references: [id])
+  assignedAt           DateTime?
+  isValidatedByHuman   Boolean       @default(false)
+  validatedById        String?
+  validatedBy          User?         @relation("ValidatedBy", fields: [validatedById], references: [id])
+  processedAt          DateTime?
+  createdAt            DateTime
+  updatedAt            DateTime
+  analyticsId          String?
+  
+  // Relationships
+  metadata             InvoiceMetadata?
+  extractedData        ExtractedData?
+  validatedData        ValidatedData?
+  lineItems            LineItem[]
+  payments             Payment[]
+
+  @@index([organizationId])
+  @@index([departmentId])
+  @@index([uploadedById])
+  @@index([status])
+  @@index([createdAt])
+  @@index([analyticsId])
+  @@map("invoices")
+}
+
+// Invoice metadata (AI processing info)
+model InvoiceMetadata {
+  id                  String   @id @default(cuid())
+  invoiceId           String   @unique
+  invoice             Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  modelUsed           String?
+  promptTokens        Int?
+  completionTokens    Int?
+  totalTokens         Int?
+  processingTime      Float?
+  confidence          Float?
+  aiResponseBaseUrl   String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("invoice_metadata")
+}
+
+// Extracted data from invoices (by AI)
+model ExtractedData {
+  id                    String    @id @default(cuid())
+  invoiceId             String    @unique
+  invoice               Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  // Vendor information
+  vendorName            String?
+  vendorAddress         String?
+  vendorEmail           String?
+  vendorPhone           String?
+  vendorTaxId           String?
+  
+  // Customer information
+  customerName          String?
+  customerAddress       String?
+  customerEmail         String?
+  customerPhone         String?
+  
+  // Invoice details
+  invoiceNumber         String?
+  invoiceDate           DateTime?
+  dueDate               DateTime?
+  purchaseOrderNumber   String?
+  
+  // Financial details
+  subtotal              Decimal?  @db.Decimal(15, 2)
+  taxAmount             Decimal?  @db.Decimal(15, 2)
+  taxRate               Decimal?  @db.Decimal(5, 2)
+  totalAmount           Decimal?  @db.Decimal(15, 2)
+  currency              String?   @default("EUR")
+  
+  // Payment info
+  paymentTerms          String?
+  paymentMethod         String?
+  bankAccount           String?
+  
+  // Additional info
+  notes                 String?
+  category              String?   @default("Operations")
+  validatedBy           String?
+  
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([vendorName])
+  @@index([invoiceNumber])
+  @@index([invoiceDate])
+  @@index([category])
+  @@map("extracted_data")
+}
+
+// Validated data (human-verified)
+model ValidatedData {
+  id                    String    @id @default(cuid())
+  invoiceId             String    @unique
+  invoice               Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  // Same structure as extracted data but validated
+  vendorName            String?
+  vendorAddress         String?
+  invoiceNumber         String?
+  invoiceDate           DateTime?
+  dueDate               DateTime?
+  subtotal              Decimal?  @db.Decimal(15, 2)
+  taxAmount             Decimal?  @db.Decimal(15, 2)
+  totalAmount           Decimal?  @db.Decimal(15, 2)
+  currency              String?   @default("EUR")
+  category              String?
+  status                String    @default("validated")
+  
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("validated_data")
+}
+
+// Line items within invoices
+model LineItem {
+  id                String   @id @default(cuid())
+  invoiceId         String
+  invoice           Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  description       String
+  quantity          Decimal  @db.Decimal(10, 2)
+  unitPrice         Decimal  @db.Decimal(15, 2)
+  amount            Decimal  @db.Decimal(15, 2)
+  taxRate           Decimal? @db.Decimal(5, 2)
+  taxAmount         Decimal? @db.Decimal(15, 2)
+  category          String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([invoiceId])
+  @@map("line_items")
+}
+
+// Payments associated with invoices
+model Payment {
+  id                String   @id @default(cuid())
+  invoiceId         String
+  invoice           Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  amount            Decimal  @db.Decimal(15, 2)
+  paymentDate       DateTime
+  paymentMethod     String?
+  transactionId     String?
+  status            String   @default("pending") // pending, completed, failed
+  notes             String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([invoiceId])
+  @@index([paymentDate])
+  @@map("payments")
+}
+
+// Analytics aggregations (for faster queries)
+model AnalyticsCache {
+  id                String   @id @default(cuid())
+  
+  // Metrics
+  metricType        String   // total_spend, invoice_count, avg_value, etc.
+  periodType        String   // ytd, monthly, quarterly, etc.
+  periodStart       DateTime
+  periodEnd         DateTime
+  
+  // Dimensions
+  organizationId    String?
+  departmentId      String?
+  vendorName        String?
+  category          String?
+  
+  // Values
+  value             Decimal  @db.Decimal(15, 2)
+  count             Int?
+  metadata          Json?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([metricType, periodType, periodStart, periodEnd, organizationId, departmentId, vendorName, category])
+  @@index([metricType, periodType])
+  @@index([organizationId])
+  @@map("analytics_cache")
+}
+
+// Chat History - Persistent AI conversation log
+model ChatHistory {
+  id             Int       @id @default(autoincrement())
+  userId         String?
+  user           User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  query          String    // User's natural language question
+  sqlQuery       String?   @map("sql_query") // Generated SQL
+  results        Json?     // Query results
+  error          String?   // Error message if query failed
+  executionTime  Int?      @map("executionTime") // Milliseconds
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("chat_history")
+}

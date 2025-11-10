@@ -1,0 +1,34 @@
+{
+  "name": "flowbit-analytics-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack analytics dashboard with AI-powered data chat",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "db:generate": "cd apps/api && npm run db:generate",
+    "db:push": "cd apps/api && npm run db:push",
+    "db:seed": "cd apps/api && npm run db:seed",
+    "setup": "npm install && npm run db:generate && npm run db:push && npm run db:seed"
+  },
+  "devDependencies": {
+    "@turbo/gen": "^2.0.0",
+    "prettier": "^3.3.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "packageManager": "npm@10.8.1"
+}
