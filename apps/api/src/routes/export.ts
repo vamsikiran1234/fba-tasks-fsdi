@@ -61,7 +61,7 @@ router.get("/invoices/csv", async (req, res) => {
     ];
 
     const rows = invoices.map((inv) => {
-      const extracted = inv.extractedData[0];
+      const extracted = inv.extractedData || null;
       return [
         inv.id,
         extracted?.invoiceNumber || "N/A",
@@ -95,7 +95,7 @@ router.get("/invoices/csv", async (req, res) => {
  * Export vendors summary to CSV
  * GET /api/export/vendors/csv
  */
-router.get("/vendors/csv", async (req, res) => {
+router.get("/vendors/csv", async (_req, res) => {
   try {
     const vendors = await prisma.extractedData.groupBy({
       by: ["vendorName"],
@@ -145,7 +145,7 @@ router.get("/vendors/csv", async (req, res) => {
  * Export analytics summary to CSV
  * GET /api/export/analytics/csv
  */
-router.get("/analytics/csv", async (req, res) => {
+router.get("/analytics/csv", async (_req, res) => {
   try {
     // Get monthly summary
     const monthlySummary = await prisma.$queryRaw<

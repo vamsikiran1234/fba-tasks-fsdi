@@ -14,10 +14,10 @@ const chatRequestSchema = z.object({
  * Forwards natural language queries to Vanna AI service
  * Returns generated SQL and query results
  */
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response): Promise<void> => {
   try {
     const validatedData = chatRequestSchema.parse(req.body);
-    const { query, conversationId } = validatedData;
+    const { query } = validatedData;
 
     const vannaApiUrl = process.env.VANNA_API_BASE_URL || "http://localhost:8000";
 
@@ -37,7 +37,12 @@ router.post("/", async (req: Request, res: Response) => {
       throw new Error(`Vanna AI service error: ${response.status} - ${errorText}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as { 
+      sql: string; 
+      results: unknown; 
+      explanation: string; 
+      conversation_id: string 
+    };
 
     res.json({
       query,
@@ -51,10 +56,11 @@ router.post("/", async (req: Request, res: Response) => {
     console.error("Error in chat-with-data:", error);
 
     if (error instanceof z.ZodError) {
-      return res.status(400).json({
+      res.status(400).json({
         error: "Invalid request",
         details: error.errors,
       });
+      return;
     }
 
     res.status(500).json({
@@ -68,12 +74,13 @@ router.post("/", async (req: Request, res: Response) => {
  * GET /api/chat-with-data/history
  * Returns chat history (if implemented)
  */
-router.get("/history", async (req: Request, res: Response) => {
+router.get("/history", async (req: Request, res: Response): Promise<void> => {
   try {
     const conversationId = req.query.conversationId as string;
 
     if (!conversationId) {
-      return res.status(400).json({ error: "conversationId is required" });
+      res.status(400).json({ error: "conversationId is required" });
+      return;
     }
 
     // This would typically fetch from a database

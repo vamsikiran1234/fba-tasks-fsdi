@@ -1,6 +1,5 @@
 import { Router, Request, Response } from "express";
 import prisma from "../lib/prisma.js";
-import { Prisma } from "@prisma/client";
 
 const router = Router();
 
@@ -8,7 +7,7 @@ const router = Router();
  * GET /api/stats
  * Returns overview statistics for dashboard cards
  */
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", async (_req: Request, res: Response) => {
   try {
     const currentYear = new Date().getFullYear();
     const yearStart = new Date(currentYear, 0, 1);

@@ -14,7 +14,7 @@ export function formatCurrency(value: number, currency: string = "EUR"): string 
 
 export function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
-  return new Intl.DateFormat("de-DE").format(d);
+  return new Date(d).toLocaleDateString("de-DE");
 }
 
 export function formatPercentage(value: number): string {

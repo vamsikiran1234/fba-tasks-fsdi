@@ -148,7 +148,7 @@ router.get("/", async (req: Request, res: Response) => {
  * GET /api/invoices/:id
  * Returns a single invoice with full details
  */
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -180,7 +180,8 @@ router.get("/:id", async (req: Request, res: Response) => {
     });
 
     if (!invoice) {
-      return res.status(404).json({ error: "Invoice not found" });
+      res.status(404).json({ error: "Invoice not found" });
+      return;
     }
 
     // Format the response
