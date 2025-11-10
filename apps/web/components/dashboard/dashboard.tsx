@@ -36,54 +36,54 @@ export function Dashboard() {
             <p className="text-xs font-semibold black uppercase tracking-wider mb-3">General</p>
           </div>
 
-          <nav className="space-y-1 px-2">
+          <nav className="space-y-1.5 px-2">
             <button
               onClick={() => setActiveTab("dashboard")}
-              className={`w-full flex items-center gap-3 px-2 py-3 rounded-lg transition-colors ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                 activeTab === "dashboard"
                   ? "bg-[#E3E6F0] text-[#1B1464] font-semibold"
                   : "text-gray-600 hover:bg-gray-50 font-medium"
               }`}
             >
               <LayoutDashboard className="w-5 h-5" />
-              <span>Dashboard</span>
+              <span className="text-sm">Dashboard</span>
             </button>
 
             <button
               onClick={() => setActiveTab("chat")}
-              className={`w-full flex items-center gap-3 px-2 py-4 rounded-lg transition-colors ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                 activeTab === "chat"
                   ? "bg-[#E3E6F0] text-[#1B1464] font-semibold"
                   : "text-gray-600 hover:bg-gray-50 font-medium"
               }`}
             >
               <MessageSquare className="w-5 h-5" />
-              <span>Chat with Data</span>
+              <span className="text-sm">Chat with Data</span>
             </button>
 
-            <button className="w-full flex items-center gap-3 px-2 py-3 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium">
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium">
               <FileText className="w-5 h-5" />
-              <span>Invoice</span>
+              <span className="text-sm">Invoice</span>
             </button>
 
-            <button className="w-full flex items-center gap-3 px-2 py-3 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium">
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium">
               <FileText className="w-5 h-5" />
-              <span>Other files</span>
+              <span className="text-sm">Other files</span>
             </button>
 
-            <button className="w-full flex items-center gap-3 px-2 py-3 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium">
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium">
               <Users className="w-5 h-5" />
-              <span>Departments</span>
+              <span className="text-sm">Departments</span>
             </button>
 
-            <button className="w-full flex items-center gap-3 px-2 py-3 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium">
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium">
               <Users className="w-5 h-5" />
-              <span>Users</span>
+              <span className="text-sm">Users</span>
             </button>
 
-            <button className="w-full flex items-center gap-3 px-2 py-3 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium">
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium">
               <Settings className="w-5 h-5" />
-              <span>Settings</span>
+              <span className="text-sm">Settings</span>
             </button>
           </nav>
 
