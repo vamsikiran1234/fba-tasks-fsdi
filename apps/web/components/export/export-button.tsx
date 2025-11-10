@@ -18,8 +18,11 @@ export function ExportButton({ type, label, filters = {} }: ExportButtonProps) {
       setIsExporting(true);
 
       // Build query string from filters
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://fba-tasks-fsdi-api.vercel.app";
       const queryParams = new URLSearchParams(filters).toString();
-      const url = `/api/export/${type}/csv${queryParams ? `?${queryParams}` : ""}`;
+      const url = `${API_BASE}/api/export/${type}/csv${queryParams ? `?${queryParams}` : ""}`;
+
+      console.log("📥 Exporting from:", url);
 
       // Trigger download
       const response = await fetch(url);
