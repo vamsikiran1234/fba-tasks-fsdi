@@ -113,7 +113,7 @@ export function DashboardView() {
       setLoading(true);
 
       // Fetch all data in parallel
-      const API_BASE = "http://localhost:3001";
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://fba-tasks-fsdi-api.vercel.app";
       const [statsRes, trendsRes, vendorsRes, categoriesRes, forecastRes, invoicesRes] =
         await Promise.all([
           fetch(`${API_BASE}/api/stats`),
@@ -168,7 +168,7 @@ export function DashboardView() {
     setSearchTerm(term);
     if (term.length > 2) {
       try {
-        const API_BASE = "http://localhost:3001";
+        const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://fba-tasks-fsdi-api.vercel.app";
         const res = await fetch(
           `${API_BASE}/api/invoices?search=${term}&page=${currentPage}&limit=10`
         );

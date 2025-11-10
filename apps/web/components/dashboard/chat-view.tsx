@@ -91,7 +91,7 @@ export function ChatView() {
     const startTime = performance.now();
 
     try {
-      const API_BASE = "http://localhost:3001";
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://fba-tasks-fsdi-api.vercel.app";
       const response = await fetch(`${API_BASE}/api/chat-with-data`, {
         method: "POST",
         headers: {
