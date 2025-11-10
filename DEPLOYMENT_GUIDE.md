@@ -238,8 +238,8 @@ npm install -g vercel
    Click "Environment Variables" and add:
 
    ```bash
-   # Database
-   DATABASE_URL=postgresql://user:password@host:port/database
+   # Database (Use your Neon connection string from Step 2)
+   DATABASE_URL=postgresql://neondb_owner:YOUR_PASSWORD@ep-xxxxx-xxxxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
 
    # API Base (will be same as your Vercel URL)
    NEXT_PUBLIC_API_BASE=/api
@@ -247,9 +247,15 @@ npm install -g vercel
    # Vanna AI (add after deploying Vanna in Step 4)
    VANNA_API_BASE_URL=https://your-vanna-service.onrender.com
    
-   # Groq API Key
+   # Groq API Key (Get from https://console.groq.com)
    GROQ_API_KEY=your_groq_api_key_here
    ```
+   
+   **Important Notes:**
+   - Use your **actual Neon connection string** from `apps/api/.env`
+   - Your Neon URL should look like: `ep-broad-bush-a1wdclvl-pooler.ap-southeast-1.aws.neon.tech`
+   - Keep `?sslmode=require` at the end
+   - Apply to **all environments** (Production, Preview, Development)
 
    **How to get Groq API Key:**
    - Go to https://console.groq.com
@@ -334,13 +340,21 @@ npx prisma studio
 
 4. **Add Environment Variables**
    ```bash
-   DATABASE_URL=postgresql+psycopg://user:password@host:port/database
+   # Neon Database (Change postgresql:// to postgresql+psycopg:// for Vanna)
+   DATABASE_URL=postgresql+psycopg://neondb_owner:YOUR_PASSWORD@ep-xxxxx-xxxxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+   
+   # Groq API Key
    GROQ_API_KEY=your_groq_api_key_here
+   
+   # Port
    PORT=8000
    PYTHONUNBUFFERED=1
    ```
 
-   **Note:** For Vanna, use `postgresql+psycopg://` prefix instead of `postgresql://`
+   **Important:** For Vanna AI (Python/SQLAlchemy), change the protocol:
+   - Vercel (Prisma): `postgresql://` 
+   - Vanna (SQLAlchemy): `postgresql+psycopg://`
+   - Everything else stays the same!
 
 5. **Deploy**
    - Click "Create Web Service"

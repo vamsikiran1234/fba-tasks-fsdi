@@ -524,10 +524,8 @@ export function DashboardView() {
                 }}
                 onMouseLeave={() => setActivePoint(null)}
               >
-                <defs>
-                  {/* No gradients needed - using solid colors */}
-                </defs>
-                
+                <defs>{/* No gradients needed - using solid colors */}</defs>
+
                 <XAxis
                   dataKey="month"
                   axisLine={false}
@@ -535,13 +533,13 @@ export function DashboardView() {
                   tick={{ fill: "#6B7280", fontSize: 13, fontWeight: 400 }}
                   dy={10}
                 />
-                
+
                 <YAxis
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: "#9CA3AF", fontSize: 12 }}
                   tickFormatter={(value) => value.toLocaleString()}
-                  domain={[0, 'auto']}
+                  domain={[0, "auto"]}
                   dx={-10}
                 />
 
@@ -557,22 +555,19 @@ export function DashboardView() {
                   {trends.map((trend, index) => {
                     const isActive = activePoint === trend.month;
                     return (
-                      <Cell
-                        key={`bg-cell-${index}`}
-                        fill={isActive ? "#BDBCD6" : "#E9ECF1"}
-                      />
+                      <Cell key={`bg-cell-${index}`} fill={isActive ? "#BDBCD6" : "#E9ECF1"} />
                     );
                   })}
                 </Bar>
-                
+
                 <Tooltip
                   cursor={false}
                   content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
                       // Find the actual data values (not bgHeight)
-                      const invoiceData = payload.find(p => p.dataKey === 'invoiceCount');
-                      const spendData = payload.find(p => p.dataKey === 'totalSpend');
-                      
+                      const invoiceData = payload.find((p) => p.dataKey === "invoiceCount");
+                      const spendData = payload.find((p) => p.dataKey === "totalSpend");
+
                       return (
                         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-5 min-w-[200px]">
                           <div className="text-gray-900 font-semibold text-base mb-3">
@@ -598,7 +593,7 @@ export function DashboardView() {
                     return null;
                   }}
                 />
-                
+
                 <Legend
                   verticalAlign="bottom"
                   height={50}
@@ -649,7 +644,7 @@ export function DashboardView() {
                   }}
                   activeDot={false}
                 />
-                
+
                 <Line
                   type="monotone"
                   dataKey="totalSpend"
@@ -804,7 +799,7 @@ export function DashboardView() {
                   iconType="circle"
                   iconSize={8}
                   formatter={(value, entry: any) => {
-                    const item = categories.find(c => c.category === value);
+                    const item = categories.find((c) => c.category === value);
                     return `${value} : ${formatCurrency(item?.totalSpend || 0)}`;
                   }}
                 />
@@ -824,10 +819,15 @@ export function DashboardView() {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5 py-4">
-            {forecast.length > 0 && forecast.some(f => f.totalAmount > 0) ? (
+            {forecast.length > 0 && forecast.some((f) => f.totalAmount > 0) ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={forecast} margin={{ top: 10, right: 20, left: -10, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="0" stroke="transparent" vertical={false} horizontal={false} />
+                  <CartesianGrid
+                    strokeDasharray="0"
+                    stroke="transparent"
+                    vertical={false}
+                    horizontal={false}
+                  />
                   <XAxis
                     dataKey="period"
                     stroke="#9CA3AF"
@@ -838,8 +838,8 @@ export function DashboardView() {
                     textAnchor="middle"
                     dy={10}
                   />
-                  <YAxis 
-                    stroke="#9CA3AF" 
+                  <YAxis
+                    stroke="#9CA3AF"
                     axisLine={false}
                     tickLine={false}
                     style={{ fontSize: "12px" }}
@@ -859,25 +859,34 @@ export function DashboardView() {
                       fontWeight: "600",
                     }}
                     formatter={(value: number) => formatCurrency(value)}
-                    cursor={{ fill: 'transparent' }}
+                    cursor={{ fill: "transparent" }}
                   />
-                  <Bar
-                    dataKey="totalAmount"
-                    fill="#1B1464"
-                    radius={[8, 8, 8, 8]}
-                    barSize={50}
-                  />
+                  <Bar dataKey="totalAmount" fill="#1B1464" radius={[8, 8, 8, 8]} barSize={50} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex flex-col items-center justify-center h-[280px] text-center px-4">
                 <div className="text-gray-400 mb-2">
-                  <svg className="w-16 h-16 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  <svg
+                    className="w-16 h-16 mx-auto mb-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    />
                   </svg>
                 </div>
-                <p className="text-sm font-medium text-gray-600 mb-1">No Upcoming Payment Obligations</p>
-                <p className="text-xs text-gray-500">All invoices in the dataset have past due dates</p>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  No Upcoming Payment Obligations
+                </p>
+                <p className="text-xs text-gray-500">
+                  All invoices in the dataset have past due dates
+                </p>
                 <div className="mt-6 flex items-center justify-around w-full max-w-md text-xs text-gray-400">
                   <span>0-7 days</span>
                   <span>8-30 days</span>
