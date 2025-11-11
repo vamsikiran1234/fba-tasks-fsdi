@@ -89,17 +89,17 @@ export function Dashboard() {
 
           {/* Separator Line */}
           <div className="mt-6 pt-6 border-t border-gray-200"></div>
-        </div>
 
-        {/* Flowbit AI Logo at bottom */}
-        <div className="absolute bottom left-0 w-[220px] px-6 py-3">
-          <div className="flex items-center justify-center">
-            {/* Flowbit Logo from URL - Larger Size */}
-            <img
-              src="https://www.flowbitai.com/logo.svg"
-              alt="Flowbit AI"
-              className="w-32 h-auto"
-            />
+          {/* Flowbit AI Logo at bottom - only visible when sidebar is open */}
+          <div className="absolute bottom-0 left-0 w-[220px] px-6 py-4 bg-white">
+            <div className="flex items-center justify-center">
+              {/* Flowbit Logo from URL - Larger Size */}
+              <img
+                src="https://www.flowbitai.com/logo.svg"
+                alt="Flowbit AI"
+                className="w-32 h-auto"
+              />
+            </div>
           </div>
         </div>
       </aside>
