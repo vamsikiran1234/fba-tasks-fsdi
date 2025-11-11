@@ -10,23 +10,17 @@ const router = Router();
 router.get("/", async (_req: Request, res: Response) => {
   try {
     const currentYear = new Date().getFullYear();
-    const yearStart = new Date(currentYear, 0, 1);
     const lastMonth = new Date();
     lastMonth.setMonth(lastMonth.getMonth() - 1);
 
-    // Total Spend YTD
+    // Total Spend (ALL TIME - since dataset has historical data)
     const totalSpendResult = await prisma.extractedData.aggregate({
-      where: {
-        invoiceDate: {
-          gte: yearStart,
-        },
-      },
       _sum: {
         totalAmount: true,
       },
     });
 
-    // Previous year comparison
+    // Previous year comparison (keeping for change calculation)
     const lastYearStart = new Date(currentYear - 1, 0, 1);
     const lastYearEnd = new Date(currentYear - 1, 11, 31);
     const lastYearSpend = await prisma.extractedData.aggregate({
@@ -46,19 +40,16 @@ router.get("/", async (_req: Request, res: Response) => {
     const spendChange =
       lastYearTotal > 0 ? ((totalSpend - lastYearTotal) / lastYearTotal) * 100 : 0;
 
-    // Total Invoices Processed
+    // Total Invoices Processed (ALL TIME with correct status)
     const totalInvoices = await prisma.invoice.count({
       where: {
-        status: "processed",
-        createdAt: {
-          gte: yearStart,
-        },
+        status: "COMPLETED", // Fixed: database uses COMPLETED not processed
       },
     });
 
     const lastMonthInvoices = await prisma.invoice.count({
       where: {
-        status: "processed",
+        status: "COMPLETED",
         createdAt: {
           gte: lastMonth,
         },
@@ -68,18 +59,12 @@ router.get("/", async (_req: Request, res: Response) => {
     const invoiceChange =
       lastMonthInvoices > 0 ? ((totalInvoices - lastMonthInvoices) / lastMonthInvoices) * 100 : 0;
 
-    // Documents Uploaded This Month
+    // Documents Uploaded (ALL TIME - dataset has historical uploads)
     const thisMonthStart = new Date();
     thisMonthStart.setDate(1);
     thisMonthStart.setHours(0, 0, 0, 0);
 
-    const documentsThisMonth = await prisma.invoice.count({
-      where: {
-        createdAt: {
-          gte: thisMonthStart,
-        },
-      },
-    });
+    const documentsThisMonth = await prisma.invoice.count(); // Total documents
 
     const lastMonthStart = new Date(thisMonthStart);
     lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
@@ -98,13 +83,8 @@ router.get("/", async (_req: Request, res: Response) => {
         ? ((documentsThisMonth - documentsLastMonth) / documentsLastMonth) * 100
         : 0;
 
-    // Average Invoice Value
+    // Average Invoice Value (ALL TIME)
     const avgInvoiceResult = await prisma.extractedData.aggregate({
-      where: {
-        invoiceDate: {
-          gte: yearStart,
-        },
-      },
       _avg: {
         totalAmount: true,
       },
