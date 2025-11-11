@@ -89,15 +89,26 @@ class VannaConfig:
            ❌ WRONG: SELECT ed.invoiceId, ed.totalAmount FROM extracted_data ed
         
         Common query patterns (ALWAYS use double quotes on columns):
+        
+        SIMPLE QUERIES (single table):
         - Total spend: SELECT SUM("totalAmount") FROM extracted_data
-        - Tax amount: SELECT SUM("taxAmount") FROM extracted_data WHERE EXTRACT(YEAR FROM "invoiceDate") = EXTRACT(YEAR FROM CURRENT_DATE)
-        - Count all invoices: SELECT COUNT(*) FROM invoices
-        - Count processed invoices: SELECT COUNT(*) FROM invoices i WHERE i."status" IN ('APPROVED', 'REJECTED', 'PAID')
-        - Pending invoices: SELECT COUNT(*) FROM invoices i WHERE i."status" = 'PENDING'
-        - Invoice with status: SELECT ed."vendorName", ed."totalAmount", i."status" FROM extracted_data ed JOIN invoices i ON ed."invoiceId" = i."id" WHERE i."status" = 'PENDING'
+        - Count invoices: SELECT COUNT(*) FROM extracted_data
         - Top vendors: SELECT "vendorName", SUM("totalAmount") as total FROM extracted_data GROUP BY "vendorName" ORDER BY total DESC LIMIT 10
+        - All vendors: SELECT DISTINCT "vendorName" FROM extracted_data ORDER BY "vendorName"
         - Monthly trends: SELECT DATE_TRUNC('month', "invoiceDate") as month, COUNT(*) as count, SUM("totalAmount") as total FROM extracted_data GROUP BY month ORDER BY month
-        - With alias: SELECT ed."invoiceId", ed."vendorName", ed."totalAmount" FROM extracted_data ed WHERE ed."invoiceDate" >= CURRENT_DATE - INTERVAL '90 days'
+        - Recent invoices: SELECT "vendorName", "invoiceNumber", "totalAmount", "invoiceDate" FROM extracted_data WHERE "invoiceDate" >= CURRENT_DATE - INTERVAL '90 days' ORDER BY "invoiceDate" DESC
+        - By category: SELECT "category", COUNT(*) as count, SUM("totalAmount") as total FROM extracted_data GROUP BY "category" ORDER BY total DESC
+        
+        VENDOR QUERIES (show vendors with their invoices):
+        - All vendors with invoices: SELECT ed."vendorName", ed."invoiceNumber", ed."totalAmount", ed."invoiceDate" FROM extracted_data ed ORDER BY ed."vendorName", ed."invoiceDate" DESC
+        - Specific vendor invoices: SELECT ed."invoiceNumber", ed."totalAmount", ed."invoiceDate", ed."dueDate" FROM extracted_data ed WHERE ed."vendorName" = 'LIDL' ORDER BY ed."invoiceDate" DESC
+        - Vendors with invoice count: SELECT ed."vendorName", COUNT(*) as invoice_count, SUM(ed."totalAmount") as total_spend FROM extracted_data ed GROUP BY ed."vendorName" ORDER BY total_spend DESC
+        
+        JOIN QUERIES (with invoice status):
+        - Tax amount: SELECT SUM("taxAmount") FROM extracted_data WHERE EXTRACT(YEAR FROM "invoiceDate") = EXTRACT(YEAR FROM CURRENT_DATE)
+        - Invoice with status: SELECT ed."vendorName", ed."invoiceNumber", ed."totalAmount", i."status" FROM extracted_data ed JOIN invoices i ON ed."invoiceId" = i."id" ORDER BY ed."invoiceDate" DESC
+        - Pending invoices: SELECT ed."vendorName", ed."invoiceNumber", ed."totalAmount" FROM extracted_data ed JOIN invoices i ON ed."invoiceId" = i."id" WHERE i."status" = 'PENDING'
+        - Paid invoices: SELECT ed."vendorName", ed."invoiceNumber", ed."totalAmount", ed."invoiceDate" FROM extracted_data ed JOIN invoices i ON ed."invoiceId" = i."id" WHERE i."status" = 'PAID'
         """
     
     def generate_sql(self, question: str) -> str:
@@ -116,13 +127,22 @@ CRITICAL REQUIREMENTS:
 2. When using table aliases, format as: alias."columnName" (e.g., ed."invoiceId", ed."totalAmount")
 3. Use proper PostgreSQL syntax
 4. Handle NULL values appropriately
-5. Use appropriate aggregations
+5. Use appropriate aggregations (SUM, COUNT, AVG, etc.)
 6. Include ORDER BY for sorted results
-7. Limit results to reasonable numbers (e.g., LIMIT 10-100 for lists)
+7. For lists, use LIMIT 100 (show reasonable number of results)
+8. When asked about "vendors" or "all vendors", show vendor information with their invoices
+9. For "show", "list", "get" queries, include relevant columns (vendorName, invoiceNumber, totalAmount, invoiceDate)
+
+QUERY INTERPRETATION GUIDE:
+- "all vendors" OR "vendors with invoices" → SELECT "vendorName", "invoiceNumber", "totalAmount", "invoiceDate" FROM extracted_data ORDER BY "vendorName", "invoiceDate" DESC LIMIT 100
+- "top vendors" → SELECT "vendorName", SUM("totalAmount") as total FROM extracted_data GROUP BY "vendorName" ORDER BY total DESC LIMIT 10
+- "total spend" → SELECT SUM("totalAmount") FROM extracted_data
+- "how many invoices" → SELECT COUNT(*) FROM extracted_data
+- "invoices by category" → SELECT "category", COUNT(*) as count, SUM("totalAmount") as total FROM extracted_data GROUP BY "category"
 
 Examples of CORRECT syntax:
 - SELECT "vendorName", "totalAmount" FROM extracted_data
-- SELECT ed."invoiceId", ed."vendorName" FROM extracted_data ed
+- SELECT ed."vendorName", ed."invoiceNumber", ed."totalAmount" FROM extracted_data ed ORDER BY ed."vendorName"
 - SELECT SUM("totalAmount") FROM extracted_data WHERE "invoiceDate" >= '2025-01-01'
 """
 
