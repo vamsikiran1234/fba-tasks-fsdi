@@ -112,19 +112,29 @@ export function DashboardView() {
     try {
       setLoading(true);
 
-      // Fetch all data in parallel
+      // Fetch all data in parallel with timeout
       const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://fba-tasks-fsdi-api.vercel.app";
       console.log("🔍 API_BASE:", API_BASE);
       console.log("🚀 Starting API calls...");
       
+      // Add timeout wrapper (30 seconds for cold starts)
+      const fetchWithTimeout = (url: string, timeout = 30000) => {
+        return Promise.race([
+          fetch(url),
+          new Promise<Response>((_, reject) =>
+            setTimeout(() => reject(new Error('Request timeout')), timeout)
+          )
+        ]);
+      };
+      
       const [statsRes, trendsRes, vendorsRes, categoriesRes, forecastRes, invoicesRes] =
         await Promise.all([
-          fetch(`${API_BASE}/api/stats`),
-          fetch(`${API_BASE}/api/invoice-trends`),
-          fetch(`${API_BASE}/api/vendors/top10`),
-          fetch(`${API_BASE}/api/category-spend`),
-          fetch(`${API_BASE}/api/cash-outflow`),
-          fetch(`${API_BASE}/api/invoices?limit=10`),
+          fetchWithTimeout(`${API_BASE}/api/stats`),
+          fetchWithTimeout(`${API_BASE}/api/invoice-trends`),
+          fetchWithTimeout(`${API_BASE}/api/vendors/top10`),
+          fetchWithTimeout(`${API_BASE}/api/category-spend`),
+          fetchWithTimeout(`${API_BASE}/api/cash-outflow`),
+          fetchWithTimeout(`${API_BASE}/api/invoices?limit=10`),
         ]);
       
       console.log("✅ API calls completed:", {
@@ -220,10 +230,15 @@ export function DashboardView() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-center max-w-md">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto"></div>
+          <p className="mt-6 text-lg font-semibold text-gray-800">Loading Dashboard...</p>
+          <p className="mt-2 text-sm text-gray-500">Fetching analytics data from the server</p>
+          <div className="mt-4 text-xs text-gray-400 bg-white rounded-lg p-3 border border-gray-200">
+            <p className="font-medium">💡 First load may take 10-20 seconds</p>
+            <p className="mt-1">Free tier services need to wake up (cold start)</p>
+          </div>
         </div>
       </div>
     );

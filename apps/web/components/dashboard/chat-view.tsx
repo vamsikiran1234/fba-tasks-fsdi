@@ -88,6 +88,15 @@ export function ChatView() {
     setInput("");
     setLoading(true);
 
+    // Add loading message
+    const loadingMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      type: "assistant",
+      content: "🤔 Analyzing your question and generating SQL... (First query may take 10-20s due to cold start)",
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, loadingMessage]);
+
     const startTime = performance.now();
 
     try {
@@ -118,7 +127,7 @@ export function ChatView() {
       const executionTime = Math.round(endTime - startTime);
 
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: loadingMessage.id, // Replace loading message with actual response
         type: "assistant",
         content: data.explanation || `Found ${data.results?.length || 0} results`,
         sql: data.sql,
@@ -127,19 +136,21 @@ export function ChatView() {
         executionTime,
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      // Replace loading message with actual response
+      setMessages((prev) => prev.map(msg => msg.id === loadingMessage.id ? assistantMessage : msg));
     } catch (error) {
       console.error("Error sending message:", error);
 
       const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: loadingMessage.id,
         type: "assistant",
         content:
-          "Sorry, I encountered an error processing your request. Please make sure the Vanna AI service is running on port 8000.",
+          "❌ Sorry, I encountered an error processing your request. The AI service may be starting up (cold start) - please try again in a moment.",
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, errorMessage]);
+      // Replace loading message with error
+      setMessages((prev) => prev.map(msg => msg.id === loadingMessage.id ? errorMessage : msg));
     } finally {
       setLoading(false);
     }
@@ -297,7 +308,12 @@ export function ChatView() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Try these sample queries:</CardTitle>
-                <CardDescription>Click any question to get started</CardDescription>
+                <CardDescription>
+                  Click any question to get started
+                  <span className="block mt-1 text-xs text-amber-600">
+                    ⚡ First query may take 10-20s (free tier cold start)
+                  </span>
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
